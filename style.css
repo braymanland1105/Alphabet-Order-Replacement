@@ -1,0 +1,301 @@
+/* General Styling */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #e0f7fa; /* Light blue background, similar to PDF */
+    font-family: Arial, sans-serif; /* Basic font */
+    margin: 0;
+    overflow: hidden; /* Hide anything outside the game area */
+}
+
+#game-container {
+    width: 90%;
+    max-width: 800px; /* Limit game width */
+    height: 600px; /* Fixed height */
+    background-color: #a5d6a7; /* Greenish background, similar to game area */
+    border: 5px solid #388e3c; /* Darker green border */
+    border-radius: 15px;
+    position: relative; /* For positioning screens */
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+/* Screens */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* Title Screen Specifics */
+#title-screen h1 {
+    color: #d32f2f; /* Red color */
+    font-size: 3em;
+    margin-bottom: 40px;
+    font-weight: bold;
+    text-shadow: 2px 2px #8b0000; /* Simple shadow */
+}
+
+/* GO Buttons */
+.go-button {
+    background-color: #fbc02d; /* Yellow button */
+    color: #bf360c; /* Brownish text */
+    border: 3px solid #bf360c;
+    border-radius: 50%; /* Circular button */
+    width: 100px;
+    height: 100px;
+    font-size: 2em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px #8a6d1d;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.go-button:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px #8a6d1d;
+}
+
+/* Popups */
+.popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Dim background */
+    display: none; /* Explicitly ensure it's hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure popup is on top */
+}
+
+.popup.active {
+    display: flex; /* This correctly shows the popup */
+}
+
+
+.popup-content {
+    background-color: #fffde7; /* Creamy background */
+    padding: 30px 40px;
+    border-radius: 10px;
+    border: 5px solid #fbc02d; /* Yellow border */
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    max-width: 70%;
+}
+
+.popup-content p {
+    margin: 15px 0;
+    font-size: 1.2em;
+    color: #5d4037; /* Brown text */
+}
+
+.popup-content .go-button { /* Style GO button within popup */
+    width: 80px;
+    height: 80px;
+    font-size: 1.5em;
+    margin-top: 20px;
+}
+
+
+/* Game Screen Specifics */
+#game-screen {
+    justify-content: space-between; /* Puts slots at top, pile at bottom */
+}
+
+#name-plate {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #ffffff;
+    padding: 5px 15px;
+    border: 2px solid #388e3c;
+    border-radius: 5px;
+    font-weight: bold;
+    color: #388e3c;
+    z-index: 10; /* Ensure nameplate is above slots */
+}
+
+#alphabet-slots {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    gap: 5px; /* Space between slots */
+    margin-top: 40px; /* Space below nameplate */
+    width: 100%;
+}
+
+.slot {
+    width: 55px; /* Adjust size as needed */
+    height: 55px;
+    background-color: #fffde7; /* Light background for slots */
+    border: 2px dashed #c8b979; /* Dashed border */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2px;
+    transition: background-color 0.3s; /* For drop indication */
+}
+
+.slot.over { /* Style when dragging over */
+    background-color: #f0e6a7;
+    border-style: solid;
+}
+
+#block-pile {
+    width: 100%;
+    min-height: 150px; /* Use min-height to allow expansion if needed */
+    background-color: #c8e6c9; /* Lighter green for pile area */
+    border-top: 3px solid #388e3c;
+    /* --- Flexbox for non-overlapping blocks --- */
+    display: flex;
+    flex-wrap: wrap; /* Allow blocks to wrap to the next line */
+    justify-content: center; /* Center blocks horizontally */
+    align-items: center; /* Align blocks vertically */
+    padding: 10px; /* Add some padding */
+    gap: 8px; /* Add space between blocks */
+    margin-top: auto; /* Push to bottom */
+    box-sizing: border-box; /* Include padding in size calculation */
+}
+
+/* Base styles for letter blocks */
+.letter-block {
+    width: 50px;
+    height: 50px;
+    background-color: #fbc02d; /* Yellow blocks */
+    border: 3px solid #bf360c; /* Brown border */
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #bf360c; /* Brown letter */
+    cursor: grab;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    user-select: none; /* Prevent text selection */
+    /* Base transition */
+    transition: transform 0.2s ease-out, box-shadow 0.2s;
+    transform-origin: center center; /* Rotate around the center */
+}
+
+/* Styles for blocks during initial placement and animation */
+.letter-block.initial-position {
+    position: absolute; /* Position absolutely for animation start */
+    /* Slower fall animation */
+    transition: top 1s cubic-bezier(0.6, -0.28, 0.735, 0.045),
+                left 1s ease-out,
+                transform 1s ease-in-out;
+    z-index: 60; /* Ensure animating blocks are above slots but below popups */
+}
+
+
+.letter-block:active {
+    cursor: grabbing;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+    transform: scale(1.1) !important; /* Scale up slightly */
+    z-index: 100; /* Bring to front when dragging */
+}
+
+/* Class added during drag operation */
+.letter-block.dragging {
+    opacity: 0.5;
+}
+
+
+.letter-block.placed { /* Style for correctly placed blocks */
+    cursor: default;
+    box-shadow: 0 0 8px gold; /* Simple golden effect */
+}
+
+.letter-block.wiggle { /* Animation for incorrect placement */
+    animation: wiggle 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px) rotate(-5deg); }
+    75% { transform: translateX(8px) rotate(5deg); }
+}
+
+.letter-block.dancing { /* Simple dance animation */
+    animation: dance 1s infinite ease-in-out alternate;
+}
+
+@keyframes dance {
+    from { transform: translateY(0) rotate(-2deg); }
+    to   { transform: translateY(-5px) rotate(2deg); }
+}
+
+/* --- Styles for Monkey --- */
+#monkey-image {
+    position: absolute;
+    width: 100px; /* Adjust size as needed */
+    height: auto;
+    /* Start hidden at bottom center */
+    opacity: 0;
+    bottom: 10px; /* Start near bottom */
+    left: calc(50% - 50px); /* Centered horizontally (adjust 50px based on half monkey width) */
+    /* Transition for movement and fade */
+    transition: top 0.4s ease-in-out, left 0.4s ease-in-out, bottom 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    z-index: 70; /* Above blocks but below popups */
+    pointer-events: none; /* Don't interfere with clicks/drags */
+    /* Ensure 'top' is not set initially if using 'bottom' */
+    top: auto;
+}
+
+#monkey-image.monkey-visible {
+    opacity: 1;
+}
+
+/* Class to hide monkey (can just set opacity 0) */
+.monkey-hidden {
+    opacity: 0 !important;
+    /* Optional: Move off screen if needed */
+    /* bottom: -120px !important; */
+}
+
+
+/* End Screen Specifics */
+#final-abc {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #fff9c4; /* Light yellow background */
+    border-radius: 5px;
+}
+
+.final-letter { /* Style for letters shown on end screen */
+    width: 40px;
+    height: 40px;
+    background-color: #fbc02d;
+    border: 2px solid #bf360c;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #bf360c;
+}
