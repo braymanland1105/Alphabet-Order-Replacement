@@ -292,6 +292,16 @@ body {
     /* bottom: -120px !important; */
 }
 
+/* Styles for Title Screen Monkey */
+#title-monkey-image {
+    position: absolute; /* Allows positioning relative to the game container */
+    left: -60px;        /* Position 30px from the left edge */
+    bottom: 90px;       /* Position 30px from the bottom edge */
+    width: 400px;       /* Set the width (adjust as needed) */
+    height: auto;       /* Maintain aspect ratio */
+    z-index: 5;         /* Optional: Keeps it above background but below other elements if needed */
+}
+
 /* End Screen Specifics */
 #final-abc {
     display: flex;
@@ -316,4 +326,47 @@ body {
     font-size: 1.5em;
     font-weight: bold;
     color: #bf360c;
+}
+
+/* Styles for Static Title Screen Blocks */
+#title-blocks-container {
+    position: absolute;
+    right: 75px;  /* Position container from the right edge */
+    bottom: 230px; /* Position container from the bottom edge */
+    width: 115px; /* Approx width for 2 blocks (50px) + gap (~15px) */
+    height: 110px;/* Approx height for 2 blocks (50px) + gap (~10px) */
+    /* Add z-index if needed to ensure blocks are visible */
+    z-index: 6;
+}
+
+/* Common style adjustments for title screen blocks */
+.title-letter-block {
+    position: absolute; /* Needed for positioning within the container */
+    /* Make static blocks non-interactive */
+    cursor: default;
+    user-select: none;
+     /* Use existing block size or override if needed */
+    width: 50px;  /* Matches .letter-block size from your CSS [cite: 185] */
+    height: 50px; /* Matches .letter-block size from your CSS [cite: 185] */
+}
+
+/* Position individual blocks within the container */
+#title-block-b {
+    bottom: 0;
+    left: 0; /* B on the bottom left of the container */
+    transform: rotate(-5deg); /* Optional: Slight tilt */
+}
+
+#title-block-c {
+    bottom: 0;
+    right: 0; /* C on the bottom right of the container */
+    transform: rotate(5deg); /* Optional: Slight tilt */
+}
+
+#title-block-a {
+    /* Position A approx 1 block height higher */
+    bottom: 55px; /* (Block height 50px + 5px gap) */
+    /* Center A horizontally within the container: (Container width - Block width) / 2 */
+    left: calc(50% - 25px); /* (115px / 2) - (50px / 2) = 57.5 - 25 = 32.5px (calc does this) */
+    transform: rotate(2deg); /* Optional: Slight tilt */
 }
