@@ -53,22 +53,22 @@ body {
 
 /* GO Buttons */
 .go-button {
-    background-color: #fbc02d; /* Yellow button */
-    color: #bf360c; /* Brownish text */
-    border: 3px solid #bf360c;
+    background-color: #4CAF50; /* Green button */
+    color: white; /* White text */
+    border: 3px solid #2E7D32; /* Darl Green */
     border-radius: 50%; /* Circular button */
     width: 100px;
     height: 100px;
     font-size: 2em;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 5px #8a6d1d;
+    box-shadow: 0 5px #1B5E20; /* Darl Green */
     transition: background-color 0.2s, transform 0.1s;
 }
 
 .go-button:active {
     transform: translateY(3px);
-    box-shadow: 0 2px #8a6d1d;
+    box-shadow: 0 2px #1B5E20; /* Darl Green */
 }
 
 /* Popups */
