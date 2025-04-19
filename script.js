@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed'); // Trace 1
+
     // ### Elements
     const gameContainer = document.getElementById('game-container');
     const titleScreen = document.getElementById('title-screen');
@@ -12,16 +14,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const blockPile = document.getElementById('block-pile');
     const finalAbcContainer = document.getElementById('final-abc');
     const animationArea = document.getElementById('animation-area');
-    const monkeyImage = document.getElementById('monkey-image');
+    const monkeyJumpingSprite = document.getElementById('monkey-jumping-sprite');
     const introVO = document.getElementById('intro-vo');
     const endVO = document.getElementById('end-vo');
 
     // **Initial Validation**
-    if (!gameContainer || !gameScreen || !alphabetSlotsContainer || !blockPile || !animationArea || !finalAbcContainer || !monkeyImage || !introVO || !endVO) {
-        console.error("CRITICAL ERROR: Could not find one or more essential elements on load. Check HTML IDs:",
-            { gameContainer, gameScreen, alphabetSlotsContainer, blockPile, animationArea, finalAbcContainer, monkeyImage, introVO, endVO });
+    if (!gameContainer || !gameScreen || !alphabetSlotsContainer || !blockPile || !animationArea || !finalAbcContainer || !monkeyJumpingSprite || !introVO || !endVO) {
+        console.error("CRITICAL ERROR: Could not find one or more essential elements on load. Check HTML IDs:", {
+            gameContainer, gameScreen, alphabetSlotsContainer, blockPile, animationArea, finalAbcContainer, monkeyJumpingSprite, introVO, endVO
+        });
         return;
     }
+    console.log('All essential elements found'); // Trace 2
 
     // ### Game State
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
@@ -33,10 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let blockData = {};
     let monkeySound = null;
     let monkeySoundLooping = false;
+    let monkeyAnimationInterval = null;
+    let monkeyFallInterval = null;
 
     // ### Audio Playback Functions
-
-    /** Stops an audio element if it's playing */
     const stopAudio = (audioElement) => {
         if (audioElement && !audioElement.paused) {
             audioElement.pause();
@@ -44,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /** Plays a sound based on the given name */
     const playSound = (soundName) => {
         let soundFile = '';
         let isLetterSound = false;
@@ -69,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /** Starts the looping monkey sound */
     function startMonkeySound() {
         if (monkeySound) {
             monkeySound.pause();
@@ -91,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /** Stops the monkey sound */
     function stopMonkeySound() {
         monkeySoundLooping = false;
         if (monkeySound) {
@@ -101,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ### Utility Function: Shuffle Array
-    /** Randomizes an array using Fisher-Yates shuffle */
     function shuffleArray(array) {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -112,22 +112,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ### Core Functions
-
-    /** Initializes or resets the game state */
     function initializeGame() {
+        console.log('Initializing game'); // Trace 3
         stopAudio(currentSong);
         currentSong = null;
         stopAudio(introVO);
         stopAudio(endVO);
 
+        if (monkeyAnimationInterval) {
+            clearInterval(monkeyAnimationInterval);
+            monkeyAnimationInterval = null;
+        }
+        if (monkeyFallInterval) {
+            clearInterval(monkeyFallInterval);
+            monkeyFallInterval = null;
+        }
+
         if (alphabetSlotsContainer) alphabetSlotsContainer.innerHTML = '';
         if (blockPile) blockPile.innerHTML = '';
         if (animationArea) animationArea.innerHTML = '';
         if (finalAbcContainer) finalAbcContainer.innerHTML = '';
-        if (animationArea && !animationArea.contains(monkeyImage)) {
-            monkeyImage.classList.add('monkey-hidden');
-            animationArea.appendChild(monkeyImage);
+
+        if (animationArea && !animationArea.contains(monkeyJumpingSprite)) {
+            animationArea.appendChild(monkeyJumpingSprite);
         }
+
         placedLetters = {};
         draggedBlock = null;
         letterBlocks = [];
@@ -135,13 +144,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.screen').forEach(s => { if (s) s.classList.remove('active'); });
         document.querySelectorAll('.popup').forEach(p => { if (p) p.classList.remove('active'); });
         if (titleScreen) titleScreen.classList.add('active');
-        if (monkeyImage) monkeyImage.classList.add('monkey-hidden');
+
+        monkeyJumpingSprite.classList.add('monkey-hidden');
+        monkeyJumpingSprite.style.backgroundPosition = '0 0';
+        monkeyJumpingSprite.style.top = '';
+        monkeyJumpingSprite.style.left = '';
+
         stopMonkeySound();
+        console.log('Game initialized'); // Trace 4
     }
 
-    /** Starts the intro animation with the monkey */
     function startIntroAnimation() {
-        if (!titleScreen || !gameScreen || !introPopup || !endScreen || !alphabetSlotsContainer || !blockPile || !animationArea || !monkeyImage) {
+        console.log('Starting intro animation'); // Trace 5
+        if (!titleScreen || !gameScreen || !introPopup || !endScreen || !alphabetSlotsContainer || !blockPile || !animationArea || !monkeyJumpingSprite) {
             console.error("startIntroAnimation: Elements missing.");
             return;
         }
@@ -149,11 +164,16 @@ document.addEventListener('DOMContentLoaded', () => {
         gameScreen.classList.add('active');
         introPopup.classList.remove('active');
         endScreen.classList.remove('active');
-        monkeyImage.classList.remove('monkey-hidden');
+
+        if (animationArea && !animationArea.contains(monkeyJumpingSprite)) {
+            animationArea.appendChild(monkeyJumpingSprite);
+        }
+
+        monkeyJumpingSprite.classList.add('monkey-hidden');
+
         alphabetSlotsContainer.innerHTML = '';
         blockPile.innerHTML = '';
-        animationArea.innerHTML = '';
-        animationArea.appendChild(monkeyImage);
+
         letterBlocks = [];
         blockData = {};
 
@@ -165,7 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alphabetSlotsContainer.appendChild(slot);
             slotElements[letter] = slot;
         });
+
         alphabetSlotsContainer.offsetHeight;
+
         const animationAreaRect = animationArea.getBoundingClientRect();
         const slotElementsData = {};
 
@@ -198,25 +220,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         setTimeout(() => {
+            console.log('Proceeding with sequential animation'); // Trace 6
             proceedWithSequentialAnimation(slotElementsData);
         }, 100);
     }
 
-    /** Handles the sequential animation of the monkey knocking down blocks */
     function proceedWithSequentialAnimation(slotElementsData) {
+        console.log('Executing sequential animation steps'); // Trace 7
         startMonkeySound();
-
-        const animationAreaRect = animationArea.getBoundingClientRect();
+        let animationAreaRect = animationArea.getBoundingClientRect();
         const pileRect = blockPile.getBoundingClientRect();
         const pileTopRelative = pileRect.top - animationAreaRect.top;
         const pileHeight = blockPile.offsetHeight - 60;
         const pileWidth = blockPile.offsetWidth - 60;
         const groundY = pileRect.top - animationAreaRect.top - 80;
-        const jumpDuration = 800;
         const blockFallTime = 1000;
         const delayBetweenBlocks = 60;
 
-        // Group letters by left positions (vertical columns)
+        const frameWidth = 122;
+        const frameHeight = 122;
+        const spriteFrames = 2;
+
         const leftToLetters = {};
         alphabet.forEach(letter => {
             const left = slotElementsData[letter].left;
@@ -245,7 +269,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Calculate center of each group
         function calculateGroupCenter(letters) {
             if (letters.length === 0) return { top: 0, left: 0 };
             let sumTop = 0, sumLeft = 0;
@@ -264,14 +287,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const middleCenter = calculateGroupCenter(middleLetters);
         const leftCenter = calculateGroupCenter(leftLetters);
 
-        // Define landing positions
         const animationAreaWidth = animationAreaRect.width;
         const landAfterFirst = animationAreaWidth * 2 / 3;
         const landAfterSecond = animationAreaWidth / 3;
         const landAfterThird = 150;
 
-        /** Animates the fall of a group of letters */
+        const initialMonkeyPosX = animationAreaWidth - 150;
+        const initialMonkeyPosY = groundY;
+
+        monkeyJumpingSprite.style.top = `${initialMonkeyPosY}px`;
+        monkeyJumpingSprite.style.left = `${initialMonkeyPosX}px`;
+        monkeyJumpingSprite.classList.remove('monkey-hidden');
+        console.log('Monkey sprite made visible and positioned at start:', monkeyJumpingSprite.style.top, monkeyJumpingSprite.style.left);
+        console.log('Monkey sprite classes after initial visibility set:', monkeyJumpingSprite.classList);
+
         const animateSectionFall = (letters) => {
+            console.log('Animating section fall'); // Trace 8
             return new Promise(resolve => {
                 let blockDelay = 0;
                 let maxBlockTimeout = 0;
@@ -284,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const randomX = Math.random() * pileWidth + 30;
                         const randomY = pileTopRelative + (Math.random() * pileHeight);
                         const randomRot = Math.random() * 90 - 45;
+
                         block.style.top = `${randomY}px`;
                         block.style.left = `${randomX}px`;
                         block.style.transform = `rotate(${randomRot}deg)`;
@@ -309,146 +341,181 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
-        /** Animates the monkey jumping to a target position */
-        const animateMonkeyJump = (targetTop, targetLeft) => {
-            return new Promise(resolve => {
-                const currentStyle = window.getComputedStyle(monkeyImage);
-                const startTop = parseFloat(currentStyle.top);
-                const startLeft = parseFloat(currentStyle.left);
-                const midLeft = (startLeft + targetLeft) / 2;
-                const midTop = (startTop + targetTop) / 2;
-                const arcHeight = 30;
-                const jumpHeight = midTop - arcHeight;
-                const minTop = 150;
-                const actualJumpHeight = Math.max(minTop, jumpHeight);
-                monkeyImage.style.transition = 'none';
-                monkeyImage.offsetHeight;
-                const jumpAnimation = monkeyImage.animate([
-                    { top: `${startTop}px`, left: `${startLeft}px` },
-                    { top: `${actualJumpHeight}px`, left: `${midLeft}px`, offset: 0.5 },
-                    { top: `${targetTop}px`, left: `${targetLeft}px` }
-                ], {
-                    duration: 600,
-                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                    fill: 'forwards'
-                });
-                jumpAnimation.onfinish = () => {
-                    monkeyImage.style.transition = '';
-                    monkeyImage.style.top = `${targetTop}px`;
-                    monkeyImage.style.left = `${targetLeft}px`;
-                    setTimeout(resolve, 50);
-                };
-            });
-        };
+        const animateMonkeyJumpSequence = (targetTop, targetLeft, landingLeft) => {
+            console.log('Animating monkey jump sequence');
+            const currentTop = parseFloat(monkeyJumpingSprite.style.top) || groundY;
+            const currentLeft = parseFloat(monkeyJumpingSprite.style.left) || initialMonkeyPosX;
+            const jumpPeakY = targetTop - 20; // Peak just above target
+            const totalDuration = 0.8; // Total animation time in seconds
 
-        /** Animates the monkey falling to the ground */
-        const monkeyFallToGround = (landingX) => {
             return new Promise(resolve => {
-                const currentStyle = window.getComputedStyle(monkeyImage);
-                const currentPosX = parseFloat(currentStyle.left);
-                const currentPosY = parseFloat(currentStyle.top);
-                const targetX = landingX !== undefined ? landingX : currentPosX;
-                monkeyImage.style.transition = 'none';
-                monkeyImage.offsetHeight;
-                const fallAnimation = monkeyImage.animate([
-                    { top: `${currentPosY}px`, left: `${currentPosX}px` },
-                    { top: `${groundY}px`, left: `${targetX}px` }
-                ], {
-                    duration: 250,
-                    easing: 'cubic-bezier(0.5, 0, 1, 1)',
-                    fill: 'forwards'
-                });
-                fallAnimation.onfinish = () => {
-                    monkeyImage.style.transition = '';
-                    monkeyImage.style.top = `${groundY}px`;
-                    monkeyImage.style.left = `${targetX}px`;
-                    setTimeout(resolve, 50);
-                };
-            });
-        };
+                monkeyJumpingSprite.style.transition = 'none';
+                monkeyJumpingSprite.classList.remove('monkey-hidden');
 
-        /** Animates the monkey exiting to the left */
-        const exitMonkeyLeft = () => {
-            return new Promise(resolve => {
-                const currentPosY = parseFloat(window.getComputedStyle(monkeyImage).top);
-                monkeyImage.style.transition = 'none';
-                monkeyImage.offsetHeight;
-                const exitAnimation = monkeyImage.animate([
-                    { top: `${currentPosY}px`, left: `${monkeyImage.style.left}` },
-                    { top: `${currentPosY - 80}px`, left: '-120px' }
-                ], {
-                    duration: 700,
-                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                    fill: 'forwards'
-                });
-                exitAnimation.onfinish = () => {
-                    monkeyImage.style.transition = '';
-                    monkeyImage.style.left = '-120px';
-                    monkeyImage.style.top = `${currentPosY - 80}px`;
-                    stopMonkeySound();
-                    setTimeout(() => {
-                        monkeyImage.classList.remove('monkey-visible');
+                let animationStartTime = null;
+
+                const jumpAnimation = (timestamp) => {
+                    if (!animationStartTime) animationStartTime = timestamp;
+                    const elapsed = (timestamp - animationStartTime) / 1000; // Time in seconds
+                    const progress = Math.min(elapsed / totalDuration, 1);
+
+                    const horizontalPos = currentLeft + (landingLeft - currentLeft) * progress;
+
+                    let verticalPos;
+                    if (progress < 0.5) {
+                        const ascentProgress = progress / 0.5;
+                        verticalPos = currentTop - (currentTop - jumpPeakY) * (1 - Math.pow(1 - ascentProgress, 2));
+                    } else {
+                        const descentProgress = (progress - 0.5) / 0.5;
+                        verticalPos = jumpPeakY + (groundY - jumpPeakY) * Math.pow(descentProgress, 2);
+                    }
+
+                    monkeyJumpingSprite.style.top = `${verticalPos}px`;
+                    monkeyJumpingSprite.style.left = `${horizontalPos}px`;
+
+                    if (progress < 0.85) {
+                        monkeyJumpingSprite.style.backgroundPosition = `-${frameWidth}px 0`; // Jumping frame
+                    } else {
+                        monkeyJumpingSprite.style.backgroundPosition = '0 0'; // Standing frame
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(jumpAnimation);
+                    } else {
+                        monkeyJumpingSprite.style.top = `${groundY}px`;
+                        monkeyJumpingSprite.style.left = `${landingLeft}px`;
+                        monkeyJumpingSprite.style.backgroundPosition = '0 0';
                         resolve();
-                    }, 200);
+                    }
                 };
+                requestAnimationFrame(jumpAnimation);
             });
         };
 
-        const startPosX = animationAreaRect.width - 150;
-        monkeyImage.style.top = `${groundY}px`;
-        monkeyImage.style.left = `${startPosX}px`;
-        monkeyImage.style.bottom = 'auto';
-        monkeyImage.classList.add('monkey-visible');
+        const exitMonkeyLeft = () => {
+            console.log('Animating monkey exit left');
+            return new Promise(resolve => {
+                if (monkeyAnimationInterval) clearInterval(monkeyAnimationInterval);
+                if (monkeyFallInterval) clearInterval(monkeyFallInterval);
 
-        // **Shuffle each group's letters for randomization**
+                monkeyJumpingSprite.style.transition = 'none';
+                monkeyJumpingSprite.classList.remove('monkey-hidden');
+
+                const startLeft = parseFloat(monkeyJumpingSprite.style.left);
+                const startTop = parseFloat(monkeyJumpingSprite.style.top);
+                const endLeft = -122; // Final position off-screen
+                const endTop = startTop - 50; // Jump up slightly while exiting
+                const duration = 0.8; // seconds
+
+                let startTime = null;
+                let frame = 0;
+                const frameInterval = 150; // ms between frame changes
+                let lastFrameTime = 0;
+
+                const exitAnimation = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = (timestamp - startTime) / 1000; // seconds
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    const currentLeft = startLeft + (endLeft - startLeft) * progress;
+                    const currentTop = startTop + (endTop - startTop) * Math.sin(progress * Math.PI); // Arc movement
+
+                    monkeyJumpingSprite.style.left = `${currentLeft}px`;
+                    monkeyJumpingSprite.style.top = `${currentTop}px`;
+
+                    if (timestamp - lastFrameTime > frameInterval) {
+                        frame = (frame === 0) ? 1 : 0;
+                        monkeyJumpingSprite.style.backgroundPosition = `-${frame * frameWidth}px 0`;
+                        lastFrameTime = timestamp;
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(exitAnimation);
+                    } else {
+                        monkeyJumpingSprite.classList.add('monkey-hidden');
+                        monkeyJumpingSprite.style.backgroundPosition = '0 0';
+                        stopMonkeySound();
+                        resolve();
+                    }
+                };
+                requestAnimationFrame(exitAnimation);
+            });
+        };
+
         const shuffledRightLetters = shuffleArray(rightLetters);
         const shuffledMiddleLetters = shuffleArray(middleLetters);
         const shuffledLeftLetters = shuffleArray(leftLetters);
 
-        // **Animation Sequence**
+        console.log('Starting animation sequence promise chain'); // Trace 18
         new Promise(resolve => setTimeout(resolve, 200))
-            .then(() => animateMonkeyJump(rightCenter.top - 60, rightCenter.left - 30))
+            .then(() => animateMonkeyJumpSequence(rightCenter.top - 60, rightCenter.left - 30, landAfterFirst))
             .then(() => animateSectionFall(shuffledRightLetters))
-            .then(() => monkeyFallToGround(landAfterFirst))
             .then(() => new Promise(resolve => setTimeout(resolve, 150)))
-            .then(() => animateMonkeyJump(middleCenter.top - 60, middleCenter.left))
+            .then(() => animateMonkeyJumpSequence(middleCenter.top - 60, middleCenter.left, landAfterSecond))
             .then(() => animateSectionFall(shuffledMiddleLetters))
-            .then(() => monkeyFallToGround(landAfterSecond))
             .then(() => new Promise(resolve => setTimeout(resolve, 150)))
-            .then(() => animateMonkeyJump(leftCenter.top - 60, leftCenter.left - 30))
+            .then(() => animateMonkeyJumpSequence(leftCenter.top - 60, leftCenter.left - 30, landAfterThird))
             .then(() => animateSectionFall(shuffledLeftLetters))
-            .then(() => monkeyFallToGround(landAfterThird))
             .then(() => new Promise(resolve => setTimeout(resolve, 150)))
             .then(() => exitMonkeyLeft())
             .then(() => {
+                console.log('Animation sequence complete, showing intro popup'); // Trace 19
                 setTimeout(showIntroPopupActual, 500);
             })
             .catch(error => {
                 console.error("Error during intro animation:", error);
                 stopMonkeySound();
+                if (monkeyAnimationInterval) clearInterval(monkeyAnimationInterval);
+                if (monkeyFallInterval) clearInterval(monkeyFallInterval);
+                monkeyAnimationInterval = null;
+                monkeyFallInterval = null;
+                if (monkeyJumpingSprite) {
+                    monkeyJumpingSprite.classList.add('monkey-hidden');
+                    monkeyJumpingSprite.style.backgroundPosition = '0 0';
+                    monkeyJumpingSprite.style.top = '';
+                    monkeyJumpingSprite.style.left = '';
+                }
                 showIntroPopupActual();
             });
     }
 
-    /** Shows the intro popup and sets up drag-and-drop */
     function showIntroPopupActual() {
+        console.log('Showing intro popup'); // Trace 20
         if (!introPopup || !alphabetSlotsContainer) {
             console.error("showIntroPopupActual: Elements missing.");
             return;
         }
-        if (monkeyImage) monkeyImage.classList.add('monkey-hidden');
+        if (monkeyAnimationInterval) clearInterval(monkeyAnimationInterval);
+        if (monkeyFallInterval) clearInterval(monkeyFallInterval);
+        monkeyAnimationInterval = null;
+        monkeyFallInterval = null;
+        if (monkeyJumpingSprite) {
+            monkeyJumpingSprite.classList.add('monkey-hidden');
+            monkeyJumpingSprite.style.backgroundPosition = '0 0';
+            monkeyJumpingSprite.style.top = '';
+            monkeyJumpingSprite.style.left = '';
+        }
+
+        const popupMonkey = introPopup.querySelector('.popup-monkey');
+        if (popupMonkey) popupMonkey.src = 'assets/images/Oh_No_Monkey.png';
+
         introPopup.classList.add('active');
         stopAudio(introVO);
         introVO.play().catch(e => console.error("Error playing intro VO:", e));
+
         letterBlocks.forEach(block => {
             if (block) {
                 block.draggable = true;
                 block.removeEventListener('dragstart', dragStart);
+                block.removeEventListener('drag', drag);
                 block.removeEventListener('dragend', dragEnd);
+
                 block.addEventListener('dragstart', dragStart);
+                block.addEventListener('drag', drag);
                 block.addEventListener('dragend', dragEnd);
             }
         });
+
         const slots = alphabetSlotsContainer.querySelectorAll('.slot');
         if (slots.length > 0) {
             slots.forEach(slot => {
@@ -456,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 slot.removeEventListener('dragenter', dragEnter);
                 slot.removeEventListener('dragleave', dragLeave);
                 slot.removeEventListener('drop', drop);
+
                 slot.addEventListener('dragover', dragOver);
                 slot.addEventListener('dragenter', dragEnter);
                 slot.addEventListener('dragleave', dragLeave);
@@ -466,8 +534,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /** Starts the game after the intro popup */
     function startGame() {
+        console.log('Starting game'); // Trace 21
         stopAudio(introVO);
         if (introPopup) {
             introPopup.classList.remove('active');
@@ -476,34 +544,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /** Checks if all letters are placed */
     function checkCompletion() {
         return Object.keys(placedLetters).length === alphabet.length;
     }
 
-    /** Handles the end game sequence */
     function endGameSequence() {
+        console.log('Starting end game sequence'); // Trace 22
         if (!gameScreen || !endScreen || !finalAbcContainer) {
             console.error("endGameSequence: Missing required elements.");
             return;
         }
         stopAudio(endVO);
+        if (monkeyAnimationInterval) clearInterval(monkeyAnimationInterval);
+        if (monkeyFallInterval) clearInterval(monkeyFallInterval);
+        monkeyAnimationInterval = null;
+        monkeyFallInterval = null;
+
+        if (monkeyJumpingSprite) {
+            monkeyJumpingSprite.classList.add('monkey-hidden');
+            monkeyJumpingSprite.style.backgroundPosition = '0 0';
+            monkeyJumpingSprite.style.top = '';
+            monkeyJumpingSprite.style.left = '';
+        }
+
+        // Make placed letter blocks dance during ABC song
         Object.values(placedLetters).forEach(block => { if (block) block.classList.add('dancing'); });
         playSound('abc_song');
         setTimeout(() => {
+            // Stop dancing after song ends
             Object.values(placedLetters).forEach(block => { if (block) block.classList.remove('dancing'); });
             playSound('applause');
+
             gameScreen.classList.remove('active');
             endScreen.classList.add('active');
             finalAbcContainer.innerHTML = '';
+
             alphabet.forEach(letter => {
                 const d = document.createElement('div');
                 d.classList.add('final-letter');
                 d.textContent = letter;
                 finalAbcContainer.appendChild(d);
             });
+
             endVO.play().catch(e => console.error("Error playing end VO:", e));
-        }, 27000);
+
+            console.log('End game sequence complete'); // Trace 23
+        }, 27000); // Duration of ABC song
     }
 
     // ### Drag-and-Drop Event Handlers
@@ -520,6 +606,23 @@ document.addEventListener('DOMContentLoaded', () => {
         playSound(letter);
         setTimeout(() => { if (draggedBlock) draggedBlock.classList.add('dragging'); }, 0);
         event.dataTransfer.effectAllowed = 'move';
+        if (draggedBlock) {
+            // Create a 1x1 transparent canvas to suppress default drag image
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            event.dataTransfer.setDragImage(canvas, 0, 0);
+            // Set initial position for dragging visual
+            draggedBlock.style.left = event.clientX - draggedBlock.offsetWidth / 2 + 'px';
+            draggedBlock.style.top = event.clientY - draggedBlock.offsetHeight / 2 + 'px';
+        }
+    }
+
+    function drag(event) {
+        if (draggedBlock && event.clientX !== 0 && event.clientY !== 0) {
+            draggedBlock.style.left = event.clientX - draggedBlock.offsetWidth / 2 + 'px';
+            draggedBlock.style.top = event.clientY - draggedBlock.offsetHeight / 2 + 'px';
+        }
     }
 
     function dragEnd(event) {
@@ -527,6 +630,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (block) {
             block.classList.remove('dragging');
             if (draggedBlock && block.draggable && !block.classList.contains('placed')) {
+                block.style.position = '';
+                block.style.top = '';
+                block.style.left = '';
                 block.style.transform = originalRotation || 'none';
             }
         }
@@ -561,10 +667,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (draggedBlock) draggedBlock.classList.remove('dragging');
             return;
         }
+
         if (slot.classList.contains('slot') && !slot.hasChildNodes() && draggedBlock) {
             slot.classList.remove('over');
             const targetLetter = slot.dataset.letter;
             const droppedLetter = draggedBlock.dataset.letter;
+
             if (targetLetter === droppedLetter) {
                 playSound('correct');
                 if (draggedBlock.parentNode) {
@@ -594,18 +702,24 @@ document.addEventListener('DOMContentLoaded', () => {
                             draggedBlock.classList.remove('wiggle');
                             draggedBlock.style.transform = originalRotation || 'none';
                         }
+                        if (draggedBlock && !draggedBlock.classList.contains('placed')) {
+                            draggedBlock.draggable = true;
+                        }
                     }, 500);
                 }
             }
         } else {
             if (slot.classList.contains('slot')) slot.classList.remove('over');
-            if (draggedBlock) draggedBlock.classList.remove('dragging');
+            if (draggedBlock) {
+                draggedBlock.classList.remove('dragging');
+            }
         }
     }
 
     // ### Event Listeners
     if (startButton) {
         startButton.addEventListener('click', () => {
+            console.log('Start button clicked'); // Trace 24
             playSound('click');
             startIntroAnimation();
         });
@@ -615,6 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (popupGoButton) {
         popupGoButton.addEventListener('click', () => {
+            console.log('Popup GO button clicked'); // Trace 25
             playSound('click');
             startGame();
         });
@@ -624,6 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (playAgainButton) {
         playAgainButton.addEventListener('click', () => {
+            console.log('Play Again button clicked'); // Trace 26
             playSound('click');
             initializeGame();
         });
@@ -632,5 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ### Start the Game
+    console.log('Calling initializeGame on load'); // Trace 27
     initializeGame();
 });
