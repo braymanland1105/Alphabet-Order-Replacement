@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang "en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,50 +12,41 @@
 
     <div id="game-container">
         <div id="title-screen" class="screen active">
-            <img id="title-monkey-image" src="assets/images/Monkey.png" alt="Decorative Monkey">
+            <img id="title-monkey-image" src="assets/images/Monkey_Large.png" alt="Decorative Monkey">
             <h1>ALPHABET<br>ORDER</h1>
             <button id="start-button" class="go-button">GO</button>
-
-            <div id="title-blocks-container">
-                <div class="letter-block title-letter-block" id="title-block-b">B</div>
-                <div class="letter-block title-letter-block" id="title-block-c">C</div>
-                <div class="letter-block title-letter-block" id="title-block-a">A</div>
-            </div>
+            <img id="title-blocks-image" src="assets/images/Title_Blocks.png" alt="Title Blocks">
         </div>
 
         <div id="intro-popup" class="popup">
             <div class="popup-content">
-                <img src="assets/images/Monkey.png" alt="Monkey" class="popup-monkey">
-                <p>Oh no! Look what happened to the alphabet.</p> 
-                <p>Can you help me put the alphabet back in order?</p> 
-                <p>Tap and drag the letter blocks and place them in the correct squares.</p> 
+                <img src="assets/images/Oh_No_Monkey.png" alt="Monkey" class="popup-monkey">
+                <p>Oh no! Look what happened to the alphabet.</p>
+                <p>Can you help me put the alphabet back in order?</p>
+                <p>Tap and drag the letter blocks and place them in the correct squares.</p>
                 <button id="popup-go-button" class="go-button">GO</button>
             </div>
         </div>
 
-
-        <div id="game-screen" class="screen"> 
-             <div id="animation-area" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
-                <img id="monkey-image" src="assets/images/Monkey.png" alt="Monkey" class="monkey-hidden">
-             </div>
-            <div id="alphabet-slots">
-                </div>
-            <div id="block-pile"> 
-                </div>
+        <div id="game-screen" class="screen">
+            <div id="animation-area" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;">
+                <div id="monkey-jumping-sprite" class="monkey-hidden"></div>
+            </div>
+            <div id="alphabet-slots"></div>
+            <div id="block-pile"></div>
             <div id="name-plate">ALPHABET ORDER</div>
         </div>
 
-         <div id="end-screen" class="screen popup">
+        <div id="end-screen" class="screen popup">
             <div class="popup-content">
-                <img src="assets/images/Monkey.png" alt="Monkey" class="popup-monkey">
-                <p>Great job! You did it!</p> 
-                 <div id="final-abc">
-                    </div>
+                <img src="assets/images/Monkey_Large.png" alt="Monkey" class="popup-monkey">
+                <p>Great job! You did it!</p>
+                <div id="final-abc"></div>
                 <p>Tap the GO button to play again.</p>
                 <button id="play-again-button" class="go-button">GO</button>
+                <audio id="end-vo" src="assets/audio/End Voice Over.mp3" preload="auto"></audio>
             </div>
-
-        </div> 
+        </div>
     </div>
 
     <script src="script.js"></script>
