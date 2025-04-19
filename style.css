@@ -12,12 +12,16 @@ body {
 
 #game-container {
     width: 90%;
-    max-width: 800px; /* Limit game width */
-    height: 600px; /* Fixed height */
-    background-color: #a5d6a7; /* Greenish background, similar to game area */
-    border: 5px solid #388e3c; /* Darker green border */
+    max-width: 800px;
+    height: 600px;
+    background-color: transparent; /* Remove fallback color */
+    background-image: url('assets/images/Background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 5px solid #388e3c;
     border-radius: 15px;
-    position: relative; /* For positioning screens */
+    position: relative;
     overflow: hidden;
     box-shadow: 0 0 15px rgba(0,0,0,0.3);
 }
@@ -55,20 +59,20 @@ body {
 .go-button {
     background-color: #4CAF50; /* Green button */
     color: white; /* White text */
-    border: 3px solid #2E7D32; /* Darl Green */
+    border: 3px solid #2E7D32; /* Dark Green */
     border-radius: 50%; /* Circular button */
     width: 100px;
     height: 100px;
     font-size: 2em;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 5px #1B5E20; /* Darl Green */
+    box-shadow: 0 5px #1B5E20; /* Dark Green */
     transition: background-color 0.2s, transform 0.1s;
 }
 
 .go-button:active {
     transform: translateY(3px);
-    box-shadow: 0 2px #1B5E20; /* Darl Green */
+    box-shadow: 0 2px #1B5E20; /* Dark Green */
 }
 
 /* Popups */
@@ -91,14 +95,15 @@ body {
 }
 
 .popup-content {
-    position: relative; /* Makes this the positioning context for the monkey */
-    background-color: #fffde7; /* Creamy background */
+    position: relative;
+    background-color: #fffde7;
     padding: 30px 40px;
     border-radius: 10px;
-    border: 5px solid #fbc02d; /* Yellow border */
+    border: 5px solid #fbc02d;
     text-align: center;
     box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    max-width: 70%;
+    max-width: 80%;
+    min-height: 300px; /* Give more space for the larger monkey image */
 }
 
 .popup-content p {
@@ -116,13 +121,14 @@ body {
 
 .popup-monkey {
     position: absolute;
-    width: 175px; /* Increased to make the monkey larger */
-    height: auto;
-    bottom: -15px; /* Keeps it 10px from the bottom */
-    right: 430px;  /* Keeps it 10px from the right */
+    width: 200px; /* Reduced size */
+    height: 200px; /* Reduced size */
+    bottom: 0px; /* Adjusted position */
+    left: 10px; /* Position on the left */
+    right: auto; /* Remove right positioning */
     z-index: 10;
-    opacity: 0; /* Hidden by default */
-    transition: opacity 0.3s ease-in-out; /* Smooth fade */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .popup.active .popup-monkey {
@@ -131,7 +137,7 @@ body {
 
 /* Game Screen Specifics */
 #game-screen {
-    justify-content: space-between; /* Puts slots at top, pile at bottom */
+    background-color: transparent;
 }
 
 #name-plate {
@@ -178,17 +184,14 @@ body {
 #block-pile {
     width: 100%;
     min-height: 150px; /* Use min-height to allow expansion if needed */
-    background-color: #c8e6c9; /* Lighter green for pile area */
-    border-top: 3px solid #388e3c;
-    /* --- Flexbox for non-overlapping blocks --- */
     display: flex;
-    flex-wrap: wrap; /* Allow blocks to wrap to the next line */
-    justify-content: center; /* Center blocks horizontally */
-    align-items: center; /* Align blocks vertically */
-    padding: 10px; /* Add some padding */
-    gap: 8px; /* Add space between blocks */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 8px;
     margin-top: auto; /* Push to bottom */
-    box-sizing: border-box; /* Include padding in size calculation */
+    box-sizing: border-box;
 }
 
 /* Base styles for letter blocks */
@@ -207,7 +210,6 @@ body {
     cursor: grab;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     user-select: none; /* Prevent text selection */
-    /* Base transition */
     transition: transform 0.2s ease-out, box-shadow 0.2s;
     transform-origin: center center; /* Rotate around the center */
 }
@@ -221,7 +223,6 @@ body {
 /* Styles for blocks during initial placement and animation */
 .letter-block.initial-position {
     position: absolute; /* Position absolutely for animation start */
-    /* Slower fall animation */
     transition: top 1s cubic-bezier(0.6, -0.28, 0.735, 0.045),
                 left 1s ease-out,
                 transform 1s ease-in-out;
@@ -237,7 +238,14 @@ body {
 
 /* Class added during drag operation */
 .letter-block.dragging {
-    opacity: 0.5;
+    position: fixed; /* Use fixed position for dragging */
+    pointer-events: none; /* Do not interfere with drop target */
+    z-index: 10000; /* Ensure it's on top */
+}
+
+/* Class for dancing animation during ABC song */
+.letter-block.dancing {
+    animation: dance 1.5s infinite alternate ease-in-out;
 }
 
 .letter-block.placed { /* Style for correctly placed blocks */
@@ -255,51 +263,51 @@ body {
     75% { transform: translateX(8px) rotate(5deg); }
 }
 
-.letter-block.dancing { /* Simple dance animation */
-    animation: dance 1s infinite ease-in-out alternate;
-}
-
 @keyframes dance {
-    from { transform: translateY(0) rotate(-2deg); }
-    to   { transform: translateY(-5px) rotate(2deg); }
+    0% { transform: translateX(-3px) rotate(-2deg); }
+    100% { transform: translateX(3px) rotate(2deg); }
 }
 
-/* --- Styles for Monkey --- */
-#monkey-image {
+/* Styles for Jumping Monkey Sprite Div */
+#monkey-jumping-sprite {
     position: absolute;
-    width: 100px; /* Adjust size as needed */
-    height: auto;
-    /* Start hidden at bottom center */
-    opacity: 0;
-    bottom: 10px; /* Start near bottom */
-    left: calc(50% - 50px); /* Centered horizontally (adjust 50px based on half monkey width) */
-    /* Transition for movement and fade */
-    transition: top 0.4s ease-in-out, left 0.4s ease-in-out, bottom 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    width: 122px; /* Use correct frame width */
+    height: 122px; /* Use correct frame height */
     z-index: 70; /* Above blocks but below popups */
-    pointer-events: none; /* Don't interfere with clicks/drags */
-    /* Ensure 'top' is not set initially if using 'bottom' */
-    top: auto;
+    pointer-events: none;
+    background-image: url('assets/images/Jumping_Monkey.png');
+    background-size: 244px 122px; /* Use correct sprite sheet size */
+    background-repeat: no-repeat;
+    background-position: 0 0; /* Start on the first frame */
+    display: block;
+    transition: top 0.8s cubic-bezier(0.33, 0, 0.66, 1),
+                left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-#monkey-image.monkey-visible {
-    opacity: 1;
-}
-
-/* Class to hide monkey (can just set opacity 0) */
+/* Class to hide elements */
 .monkey-hidden {
-    opacity: 0 !important;
-    /* Optional: Move off screen if needed */
-    /* bottom: -120px !important; */
+    display: none !important;
+    opacity: 0 !important; /* Ensure opacity is also set to 0 */
 }
 
 /* Styles for Title Screen Monkey */
 #title-monkey-image {
-    position: absolute; /* Allows positioning relative to the game container */
-    left: -60px;        /* Position 30px from the left edge */
-    bottom: 90px;       /* Position 30px from the bottom edge */
-    width: 400px;       /* Set the width (adjust as needed) */
-    height: auto;       /* Maintain aspect ratio */
-    z-index: 5;         /* Optional: Keeps it above background but below other elements if needed */
+    position: absolute;
+    left: -60px;
+    bottom: 90px;
+    width: 400px;
+    height: 400px;
+    z-index: 5;
+}
+
+/* Styles for Title Screen Blocks Image */
+#title-blocks-image {
+    position: absolute;
+    right: 20px;
+    bottom: 150px;
+    width: 250px;
+    height: 250px;
+    z-index: 5;
 }
 
 /* End Screen Specifics */
@@ -326,47 +334,4 @@ body {
     font-size: 1.5em;
     font-weight: bold;
     color: #bf360c;
-}
-
-/* Styles for Static Title Screen Blocks */
-#title-blocks-container {
-    position: absolute;
-    right: 75px;  /* Position container from the right edge */
-    bottom: 230px; /* Position container from the bottom edge */
-    width: 115px; /* Approx width for 2 blocks (50px) + gap (~15px) */
-    height: 110px;/* Approx height for 2 blocks (50px) + gap (~10px) */
-    /* Add z-index if needed to ensure blocks are visible */
-    z-index: 6;
-}
-
-/* Common style adjustments for title screen blocks */
-.title-letter-block {
-    position: absolute; /* Needed for positioning within the container */
-    /* Make static blocks non-interactive */
-    cursor: default;
-    user-select: none;
-     /* Use existing block size or override if needed */
-    width: 50px;  /* Matches .letter-block size from your CSS [cite: 185] */
-    height: 50px; /* Matches .letter-block size from your CSS [cite: 185] */
-}
-
-/* Position individual blocks within the container */
-#title-block-b {
-    bottom: 0;
-    left: 0; /* B on the bottom left of the container */
-    transform: rotate(-5deg); /* Optional: Slight tilt */
-}
-
-#title-block-c {
-    bottom: 0;
-    right: 0; /* C on the bottom right of the container */
-    transform: rotate(5deg); /* Optional: Slight tilt */
-}
-
-#title-block-a {
-    /* Position A approx 1 block height higher */
-    bottom: 55px; /* (Block height 50px + 5px gap) */
-    /* Center A horizontally within the container: (Container width - Block width) / 2 */
-    left: calc(50% - 25px); /* (115px / 2) - (50px / 2) = 57.5 - 25 = 32.5px (calc does this) */
-    transform: rotate(2deg); /* Optional: Slight tilt */
 }
